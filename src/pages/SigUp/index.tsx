@@ -1,26 +1,29 @@
 import React, { useCallback, useRef } from 'react';
-import { FiLogIn, FiMail, FiLock } from 'react-icons/fi';
-import * as Yup from 'yup';
+import { FiMail, FiLock, FiUser, FiArrowLeft } from 'react-icons/fi';
 import { Form } from '@unform/web';
+import * as Yup from 'yup';
+
 import { FormHandles } from '@unform/core';
+import getValidationErrors from '../../utils/getValidationErros';
+
 import { Container, Content, Background } from './styles';
 
 import logoImg from '../../assets/logo.svg';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import getValidationErrors from '../../utils/getValidationErros';
 
-const SignIn: React.FC = () => {
+const SignUp: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
 
   const handleSubmit = useCallback(async (data: object) => {
     try {
       formRef.current?.setErrors({});
       const schema = Yup.object().shape({
+        name: Yup.string().required('Nome é obrigatório'),
         email: Yup.string()
           .required('E-mail é obrigatório')
           .email('Digite um E-mail válido'),
-        password: Yup.string().required('Senha obrigatória'),
+        password: Yup.string().min(6, 'No mínimo 6 caracteres'),
       });
 
       await schema.validate(data, {
@@ -38,9 +41,13 @@ const SignIn: React.FC = () => {
 
   return (
     <Container>
+      <Background />
+
       <Content>
-        <img src={logoImg} alt="" />
+        <img src={logoImg} alt="GoBarber" />
+
         <Form ref={formRef} onSubmit={handleSubmit}>
+          <Input name="name" placeholder="Nome" icon={FiUser} />
           <Input name="email" placeholder="E-mail" icon={FiMail} />
           <Input
             name="password"
@@ -49,19 +56,15 @@ const SignIn: React.FC = () => {
             icon={FiLock}
           />
 
-          <Button type="submit">Entrar</Button>
-
-          <a href="forgot">Esqueci minha senha</a>
+          <Button type="submit">Cadastrar</Button>
         </Form>
         <a href="login">
-          <FiLogIn />
-          Criar conta
+          <FiArrowLeft />
+          Voltar para Logon
         </a>
       </Content>
-
-      <Background />
     </Container>
   );
 };
 
-export default SignIn;
+export default SignUp;
