@@ -6,11 +6,12 @@ import { FormHandles } from '@unform/core';
 import { Container, Content, Background } from './styles';
 
 import getValidationErrors from '../../utils/getValidationErros';
-import { AuthContext } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/auth';
 
 import logoImg from '../../assets/logo.svg';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
+import { useToast } from '../../hooks/toast';
 
 interface SignInFormData {
   email: string;
@@ -20,10 +21,8 @@ interface SignInFormData {
 const SignIn: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
 
-  const { signIn } = useContext(AuthContext);
-
-  const { name } = useContext(AuthContext);
-  console.log(name);
+  const { signIn } = useAuth();
+  const { addToast } = useToast();
 
   const handleSubmit = useCallback(
     async (data: SignInFormData) => {
@@ -51,9 +50,11 @@ const SignIn: React.FC = () => {
         console.log(errors);
 
         formRef.current?.setErrors(errors);
+
+        addToast();
       }
     },
-    [signIn],
+    [signIn, addToast],
   );
 
   return (
