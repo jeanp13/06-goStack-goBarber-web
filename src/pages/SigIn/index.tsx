@@ -39,19 +39,24 @@ const SignIn: React.FC = () => {
           abortEarly: false,
         });
 
-        signIn({
+        await signIn({
           email: data.email,
           password: data.password,
         });
+
+        console.log('123');
       } catch (err) {
-        console.log(err);
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
+          console.log(errors);
+          formRef.current?.setErrors(errors);
+        }
 
-        const errors = getValidationErrors(err);
-        console.log(errors);
-
-        formRef.current?.setErrors(errors);
-
-        addToast();
+        addToast({
+          type: 'error',
+          title: 'Erro na autenticação',
+          description: 'Ocorreu um erro ao fazer login, check as credenciais',
+        });
       }
     },
     [signIn, addToast],
