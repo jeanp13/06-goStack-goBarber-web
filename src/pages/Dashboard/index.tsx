@@ -6,6 +6,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 
 import { FiClock, FiPower } from 'react-icons/fi';
 import { DayModifiers } from 'react-day-picker';
+import { Url } from 'url';
 import {
   Container,
   Header,
@@ -28,6 +29,15 @@ interface MonthAvailabilityItem {
   available: boolean;
 }
 
+interface Appointment {
+  id: string;
+  date: string;
+  user: {
+    name: string;
+    avatar: Url;
+  };
+}
+
 const Dashboard: React.FC = () => {
   const { signOut, user } = useAuth();
 
@@ -36,6 +46,7 @@ const Dashboard: React.FC = () => {
   const [monthAvailability, setMonthAvailability] = useState<
     MonthAvailabilityItem[]
   >([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
   const handleDateChange = useCallback((day: Date, modifiers: DayModifiers) => {
     if (modifiers.available) {
@@ -60,6 +71,21 @@ const Dashboard: React.FC = () => {
       });
   }, [currentMonth, user.id]);
 
+  useEffect(() => {
+    api
+      .get('/appointments/me', {
+        params: {
+          year: selectDate.getFullYear(),
+          month: selectDate.getMonth() + 1,
+          day: selectDate.getDate(),
+        },
+      })
+      .then(response => {
+        setAppointments(response.data);
+        console.log(response.data);
+      });
+  }, [selectDate]);
+
   const disableDays = useMemo(() => {
     const dates = monthAvailability
       .filter(monthDay => monthDay.available === false)
@@ -77,7 +103,11 @@ const Dashboard: React.FC = () => {
     });
   }, [selectDate]);
 
-  const selectWeekDay = useMemo(() => {}, [selectDate]);
+  const selectWeekDay = useMemo(() => {
+    return format(selectDate, 'cccc', {
+      locale: ptBR,
+    });
+  }, [selectDate]);
 
   return (
     <Container>
@@ -101,8 +131,8 @@ const Dashboard: React.FC = () => {
           <h1>Horários agendados</h1>
           <p>
             {isToday(selectDate) && <span>Hoje</span>}
-            <span>${selectDateAsText}</span>
-            <span>${selectWeekDay}</span>
+            <span>{selectDateAsText}</span>
+            <span>{selectWeekDay}</span>
           </p>
           <NextAppointment>
             <strong>Atendimento a seguir</strong>
